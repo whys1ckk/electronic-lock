@@ -2,5 +2,6 @@
 #define GPIO_H
 
 void gpio_init();
+void gpio_set_led(int mode);
 
-#endif
+#endif // GPIO_H
