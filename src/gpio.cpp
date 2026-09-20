@@ -12,28 +12,30 @@ void gpio_init()
     PORTD &= ~(1 << PORTD3);
     PORTD &= ~(1 << PORTD4);
     PORTD &= ~(1 << PORTD5);  
+    DDRD &= ~(1 << DDD6);
+    PORTD |= (1 << PORTD6);
     
 }
 
 void gpio_set_led(int mode)
 {
-    if (mode == 1)
+    if (mode == 0)
     {
         PORTD |= (1 << PORTD3);
         PORTD &= ~(1 << PORTD4);
         PORTD &= ~(1 << PORTD5);
+    }
+    else if (mode == 1)
+    {
+        PORTD &= ~(1 << PORTD3);
+        PORTD &= ~(1 << PORTD4);
+        PORTD |= (1 << PORTD5);
     }
     else if (mode == 2)
     {
         PORTD &= ~(1 << PORTD3);
         PORTD |= (1 << PORTD4);
         PORTD &= ~(1 << PORTD5);
-    }
-    else if (mode == 3)
-    {
-        PORTD &= ~(1 << PORTD3);
-        PORTD &= ~(1 << PORTD4);
-        PORTD |= (1 << PORTD5);
     }
     
 }
