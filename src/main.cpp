@@ -2,7 +2,6 @@
 #include <avr/io.h>
 #include "gpio.h"
 
-int mode = 0;
 int lastButtonState = 1;
 int lastButtonState2 = 1;
 int pin[4] = {1, 2, 3, 4};
@@ -10,6 +9,16 @@ int correctPin[4] = {1, 2, 3, 4};
 int pinIndex = 0;
 int currentDigit = 0;
 bool correct = true;
+
+enum LockState 
+{
+    LOCKED,
+    GRANTED, 
+    DENIED
+};
+
+LockState state = LOCKED;
+unsigned long state_start_time;
 
 void setup()
 {   
@@ -50,12 +59,14 @@ void loop()
             if (correct)
             {
                 Serial.println("Access Granted");
-                mode = 1;
+                state = GRANTED;
+                state_start_time = millis();
             }
             else
             {
                 Serial.println("Access Denied");
-                mode = 2;
+                state = DENIED;
+                state_start_time = millis();
             }
         for (int i = 0; i < 4; i++)
             {
@@ -68,7 +79,11 @@ void loop()
     {
         pinIndex = 0;
     }
-    gpio_set_led(mode);
+    if (state != LOCKED && millis() - state_start_time >= 2000)
+    {
+        state = LOCKED;
+    }
+    gpio_set_led(state);
 
     lastButtonState2 = button2;
     lastButtonState = button1;

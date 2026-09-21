@@ -4,10 +4,10 @@
 
 void gpio_init()
 {   
-    DDRD |= (1 << DDD3);       // D3 → OUTPUT
-    DDRD |= (1 << DDD4);       // D4 → OUTPUT
-    DDRD |= (1 << DDD5);       // D5 → OUTPUT
-    DDRD &= ~(1 << DDD2);      // D2 → INPUT
+    DDRD |= (1 << DDD3);       
+    DDRD |= (1 << DDD4);     
+    DDRD |= (1 << DDD5);       
+    DDRD &= ~(1 << DDD2);     
     PORTD |= (1 << PORTD2);  
     PORTD &= ~(1 << PORTD3);
     PORTD &= ~(1 << PORTD4);
