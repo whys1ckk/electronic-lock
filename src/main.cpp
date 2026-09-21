@@ -1,6 +1,9 @@
 #include <Arduino.h>
 #include <avr/io.h>
 #include "gpio.h"
+#include "timer.h"
+#include "oled.h"
+#include "lock_state.h"
 
 int lastButtonState = 1;
 int lastButtonState2 = 1;
@@ -10,19 +13,17 @@ int pinIndex = 0;
 int currentDigit = 0;
 bool correct = true;
 
-enum LockState 
-{
-    LOCKED,
-    GRANTED, 
-    DENIED
-};
 
 LockState state = LOCKED;
+LockState lastState = LOCKED;
+int lastPinIndex = 0;
 unsigned long state_start_time;
 
 void setup()
 {   
     gpio_init();
+    oled_init();
+    oled_show_state(state, pinIndex, pin);
     Serial.begin(9600);
 }
 
@@ -79,11 +80,18 @@ void loop()
     {
         pinIndex = 0;
     }
-    if (state != LOCKED && millis() - state_start_time >= 2000)
+    if (state != LOCKED && timer_expired(state_start_time, 2000))
     {
         state = LOCKED;
     }
     gpio_set_led(state);
+    if (state != lastState || pinIndex != lastPinIndex)
+    {
+        oled_show_state(state, pinIndex, pin);
+
+        lastState = state;
+        lastPinIndex = pinIndex;
+    }
 
     lastButtonState2 = button2;
     lastButtonState = button1;
