@@ -12,6 +12,9 @@ int correctPin[4] = {1, 2, 3, 4};
 int pinIndex = 0;
 int currentDigit = 0;
 bool correct = true;
+unsigned long lastDebounceTime1 = 0;
+unsigned long lastDebounceTime2 = 0;
+const unsigned long debounceDelay = 200;
 
 
 LockState state = LOCKED;
@@ -32,8 +35,9 @@ void loop()
     int button1 = PIND & (1 << PIND2);
     int button2 = PIND & (1 << PIND6);
 
-    if (lastButtonState && !button1)
+    if (lastButtonState && !button1 && millis() - lastDebounceTime1 > debounceDelay)
     {   
+        lastDebounceTime1 = millis();
         currentDigit++;
     }
 
@@ -41,10 +45,11 @@ void loop()
     {
         currentDigit = 0;
     }
-    if (lastButtonState2 && !button2)
+    if (lastButtonState2 && !button2 && millis() - lastDebounceTime2 > debounceDelay)
     {   
         pin[pinIndex] = currentDigit;
         pinIndex++;
+        lastDebounceTime2 = millis();
         Serial.print("PIN: ");
         if (pinIndex == 4)
         {  
@@ -56,7 +61,6 @@ void loop()
                     break;
                 }
             }
-            currentDigit = 0;
             if (correct)
             {
                 Serial.println("Access Granted");
