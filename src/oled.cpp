@@ -33,7 +33,7 @@ void oled_show_state(LockState state, int pinIndex, int pin[4])
             {
                 if (i < pinIndex) 
                 {
-                    display.print(pin[i]);
+                    display.print("*");
                 } 
                 else 
                 {

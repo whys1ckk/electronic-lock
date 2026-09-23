@@ -4,6 +4,7 @@
 #include "timer.h"
 #include "oled.h"
 #include "lock_state.h"
+#include "eeprom.h"
 
 int lastButtonState = 1;
 int lastButtonState2 = 1;
@@ -12,9 +13,11 @@ int correctPin[4] = {1, 2, 3, 4};
 int pinIndex = 0;
 int currentDigit = 0;
 bool correct = true;
+bool changePinMode = false;
 unsigned long lastDebounceTime1 = 0;
 unsigned long lastDebounceTime2 = 0;
 const unsigned long debounceDelay = 200;
+unsigned long button2PressTime = 0;
 
 
 LockState state = LOCKED;
@@ -25,7 +28,11 @@ unsigned long state_start_time;
 void setup()
 {   
     gpio_init();
+    gpio_set_led(0);
     oled_init();
+    
+    eeprom_read_pin(correctPin);
+
     oled_show_state(state, pinIndex, pin);
     Serial.begin(9600);
 }
@@ -34,6 +41,21 @@ void loop()
 {
     int button1 = PIND & (1 << PIND2);
     int button2 = PIND & (1 << PIND6);
+
+    if (!button2 && button2PressTime == 0)
+    {
+        button2PressTime = millis();
+    }
+
+    if (!button2 && millis() - button2PressTime >= 2000)
+    {
+        changePinMode = true;
+    }
+    
+    if (button2)
+    {
+        button2PressTime = 0;
+    }
 
     if (lastButtonState && !button1 && millis() - lastDebounceTime1 > debounceDelay)
     {   
@@ -49,35 +71,50 @@ void loop()
     {   
         pin[pinIndex] = currentDigit;
         pinIndex++;
-        lastDebounceTime2 = millis();
-        Serial.print("PIN: ");
+        currentDigit = 0;
+        
+
         if (pinIndex == 4)
-        {  
-            for (int i = 0; i < 4; i++)
+        {
+            if (changePinMode)
             {
-                if (pin[i] != correctPin[i])
+                eeprom_write_pin(pin);
+
+                for (int i = 0; i < 4; i++)
                 {
-                    correct = false;
-                    break;
+                    correctPin[i] = pin[i];
                 }
-            }
-            if (correct)
-            {
-                Serial.println("Access Granted");
-                state = GRANTED;
-                state_start_time = millis();
+
+                changePinMode = false;
             }
             else
             {
-                Serial.println("Access Denied");
-                state = DENIED;
-                state_start_time = millis();
-            }
-        for (int i = 0; i < 4; i++)
-            {
-                Serial.print(pin[i]);
+                for (int i = 0; i < 4; i++)
+                {
+                if (pin[i] != correctPin[i])
+                    {
+                        correct = false;
+                        break;
+                    }
+                }
+            
+                if (correct)
+                {
+                    Serial.println("Correct PIN");
+                    state = GRANTED;
+                    state_start_time = millis();
+                }
+                else
+                {   
+                    Serial.println("Access Denied");
+                    state = DENIED;
+                    state_start_time = millis();
+                }
             }
         }
+        
+        lastDebounceTime2 = millis();
+        Serial.print("PIN: ");
         correct = true;
     }
     if (pinIndex > 3)
