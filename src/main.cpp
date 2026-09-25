@@ -15,6 +15,7 @@ int pinIndex = 0;
 int currentDigit = 0;
 bool correct = true;
 bool changePinMode = false;
+bool oldPinVerified = false;
 unsigned long lastDebounceTime1 = 0;
 unsigned long lastDebounceTime2 = 0;
 const unsigned long debounceDelay = 200;
@@ -51,7 +52,7 @@ void loop()
 
     if (!button2 && millis() - button2PressTime >= 2000)
     {
-        changePinMode = true;
+       state = CHANGE_PIN;
     }
     
     if (button2)
@@ -78,16 +79,30 @@ void loop()
 
         if (pinIndex == 4)
         {
-            if (changePinMode)
+            if (state == CHANGE_PIN)
             {
-                eeprom_write_pin(pin);
-
-                for (int i = 0; i < 4; i++)
+                if (!oldPinVerified)
                 {
-                    correctPin[i] = pin[i];
+                    for (int i = 0; i < 4; i++)
+                    {
+                        if (pin[i] != correctPin[i])
+                        {
+                            correct = false;
+                            break;
+                        }
+                    }
                 }
-
-                changePinMode = false;
+                if (correct)
+                {
+                    oldPinVerified = true;
+                    pinIndex = 0;
+                }    
+                else 
+                {
+                    state = LOCKED; 
+                    pinIndex = 0;
+                    oldPinVerified = false;
+                }
             }
             else
             {
@@ -101,7 +116,7 @@ void loop()
                 }
             
                 if (correct)
-                {
+                {   
                     Serial.println("Correct PIN");
                     state = GRANTED;
                     state_start_time = millis();
