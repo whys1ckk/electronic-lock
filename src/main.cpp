@@ -5,7 +5,7 @@
 #include "oled.h"
 #include "lock_state.h"
 #include "eeprom.h"
-#include <servo.h>
+#include "servo.h"
 
 int lastButtonState = 1;
 int lastButtonState2 = 1;
@@ -105,6 +105,7 @@ void loop()
                     Serial.println("Correct PIN");
                     state = GRANTED;
                     state_start_time = millis();
+                    servo_open();
                 }
                 else
                 {   
@@ -126,6 +127,7 @@ void loop()
     if (state != LOCKED && timer_expired(state_start_time, 2000))
     {
         state = LOCKED;
+        servo_close();
     }
     gpio_set_led(state);
     if (state != lastState || pinIndex != lastPinIndex)
