@@ -5,6 +5,7 @@
 #include "oled.h"
 #include "lock_state.h"
 #include "eeprom.h"
+#include <servo.h>
 
 int lastButtonState = 1;
 int lastButtonState2 = 1;
@@ -25,9 +26,10 @@ LockState lastState = LOCKED;
 int lastPinIndex = 0;
 unsigned long state_start_time;
 
-void setup()
+void setup()    
 {   
     gpio_init();
+    servo_init();
     gpio_set_led(0);
     oled_init();
     
