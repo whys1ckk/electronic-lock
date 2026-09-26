@@ -1,17 +1,23 @@
 #include <EEPROM.h>
 #include "eeprom.h"
 
-void eeprom_write_pin(int pin[4]) 
+void eeprom_write_pin(int pin[4])
 {
-    for (int i = 0; i < 4; i++) 
+    for (int i = 0; i < 4; i++)
     {
-        EEPROM.write(i, pin[i]);
+        EEPROM.update(i, pin[i]);
     }
 }
-void eeprom_read_pin(int pin[4]) 
+
+void eeprom_read_pin(int pin[4])
 {
-    for (int i = 0; i < 4; i++) 
+    for (int i = 0; i < 4; i++)
     {
         pin[i] = EEPROM.read(i);
+
+        if (pin[i] < 0 || pin[i] > 9)
+        {
+            pin[i] = i + 1;
+        }
     }
 }

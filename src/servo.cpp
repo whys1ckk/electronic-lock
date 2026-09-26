@@ -2,7 +2,7 @@
 #include <avr/io.h>
 #include "servo.h"
 
-void servo_init() 
+void servo_init()
 {
     DDRB |= (1 << DDB1);
 
@@ -11,18 +11,20 @@ void servo_init()
     TCCR1A |= (1 << COM1A1);
     TCCR1A |= (1 << WGM11);
 
-    TCCR1B |= (1 << WGM12) | (1 << WGM13);
+    TCCR1B |= (1 << WGM12);
+    TCCR1B |= (1 << WGM13);
+
     TCCR1B |= (1 << CS11);
 
-    OCR1A = 3000;
+    servo_close();
 }
 
-void servo_open() 
+void servo_open()
 {
-    OCR1A = 2000; 
+    OCR1A = 2000;
 }
 
-void servo_close() 
+void servo_close()
 {
     OCR1A = 4000;
 }

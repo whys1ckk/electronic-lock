@@ -5,7 +5,8 @@ enum LockState
 {
     LOCKED,
     GRANTED,
-    DENIED
+    DENIED,
+    CHANGE_PIN
 };
 
 #endif // LOCK_STATE_H
